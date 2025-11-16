@@ -6,6 +6,10 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/vuemanager?useUnicode=true&useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
     username: root
-    password: admin
+    password: "040925"
+  security:
+    user:
+      name: root
+      password: admin
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**Mapper.xml
