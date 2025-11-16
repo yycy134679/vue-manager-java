@@ -1,0 +1,28 @@
+/target/
+/logs/
+*.log
+
+# IDE & OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Maven wrapper
+.mvn/wrapper/maven-wrapper.jar
+
+# Eclipse/STS
+.project
+.classpath
+.settings/
+.springBeans
+
+# Build tools
+/.classpath
+/.factorypath
+/.project
+/.settings
+
+# Others
+*.swp
+*~
