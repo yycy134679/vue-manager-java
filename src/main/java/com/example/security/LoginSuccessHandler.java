@@ -25,8 +25,14 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
                                         Authentication authentication) throws IOException, ServletException {
         System.out.println("LoginSuccessHandler!#@onAuthenticationSuccess方法.....");
         httpServletResponse.setContentType("application/json;charset=UTF-8");
+        
+        String jwt = jwtUtils.generateToken(authentication.getName());
+        System.out.println("jwt:" + jwt);
+        httpServletResponse.setHeader(jwtUtils.getHeader(), jwt);
+        
+        Result result = Result.succ("登录成功");
+        
         ServletOutputStream outputStream = httpServletResponse.getOutputStream();
-        Result result = Result.succ("???");
         outputStream.write(JSONUtil.toJsonStr(result).getBytes("UTF-8"));
         outputStream.flush();
         outputStream.close();

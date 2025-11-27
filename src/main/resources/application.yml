@@ -16,5 +16,5 @@ mybatis-plus:
 
 jwt:
   expire: 604800
-  secret: f4e2e52071b2517d36b54741c0ade5d3
+  secret: fi8n3439n439n43ld9ne9343fdfet49h
   header: Authorization

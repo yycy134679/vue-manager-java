@@ -5,6 +5,7 @@ import com.example.security.LoginSuccessHandler;
 import com.example.security.CaptchaFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -26,39 +27,47 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     CaptchaFilter captchaFilter;
 
     //白名单
-    private static final String[] URL_WHITELIST={
+    private static final String[] URL_WHITELIST = {
             "/login",
             "/logout",
             "/captcha",
             "/favicon.ico"
     };
 
-    protected void configure(HttpSecurity http) throws Exception{
+    protected void configure(HttpSecurity http) throws Exception {
         // 现状：原有配置顺序和缩进混乱，可读性较差
         // 目标：整理配置顺序、缩进，提升可读性和维护性
 
         http.cors()
-            .and()
-            .csrf().disable()
-            // 表单登录配置
-            .formLogin()
-            .successHandler(loginSuccessHandler)
-            .failureHandler(loginFailureHandler)
-            .and()
-            // 禁用 session
-            .sessionManagement()
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .and()
-            // 配置拦截规则
-            .authorizeRequests()
-            .antMatchers(URL_WHITELIST).permitAll()
-            .anyRequest().authenticated()
+                .and()
+                .csrf().disable()
+                // 表单登录配置
+                .formLogin()
+                .successHandler(loginSuccessHandler)
+                .failureHandler(loginFailureHandler)
+                .and()
+                // 禁用 session
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                // 配置拦截规则
+                .authorizeRequests()
+                .antMatchers(URL_WHITELIST).permitAll()
+                .anyRequest().authenticated()
 
-            //异常处理器
+                //异常处理器
 
-            // 配置自定义验证码过滤器
-            .and()
-            .addFilterBefore(captchaFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
+                // 配置自定义验证码过滤器
+                .and()
+                .addFilterBefore(captchaFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 
+    }
+
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.inMemoryAuthentication()
+                .withUser("root")
+                .password("{noop}admin") // {noop}表示明文密码
+                .roles("ADMIN");
     }
 }
