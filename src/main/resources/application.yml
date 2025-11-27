@@ -13,3 +13,8 @@ spring:
       password: admin
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**Mapper.xml
+
+jwt:
+  expire: 604800
+  secret: f4e2e52071b2517d36b54741c0ade5d3
+  header: Authorization
