@@ -1,11 +1,6 @@
 package com.example.config;
 
-import com.example.security.CaptchaFilter;
-import com.example.security.JwtAccessDeniedHandler;
-import com.example.security.JwtAuthenticationEntryPoint;
-import com.example.security.JwtAuthenticationFilter;
-import com.example.security.LoginFailureHandler;
-import com.example.security.LoginSuccessHandler;
+import com.example.security.*;
 import com.example.service.impl.UserDetailServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -53,6 +48,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     UserDetailServiceImpl userDetailService;
 
+    @Autowired
+    JwtLogoutSuccessHandler jwtLogoutSuccessHandler;
+
 
     // 白名单
     private static final String[] URL_WHITELIST = {
@@ -71,6 +69,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .formLogin()
                     .successHandler(loginSuccessHandler)
                     .failureHandler(loginFailureHandler)
+                    
+                //退出配置
+                .and()
+                .logout()
+                .logoutSuccessHandler(jwtLogoutSuccessHandler)
                 .and()
                 // 禁用 session
                 .sessionManagement()
@@ -87,8 +90,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .accessDeniedHandler(jwtAccessDeniedHandler)
                 .and()
                 // 配置自定义过滤器
-                .addFilter(jwtAuthenticationFilter());
-                //.addFilterBefore(captchaFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilter(jwtAuthenticationFilter())
+                .addFilterBefore(captchaFilter, UsernamePasswordAuthenticationFilter.class);
     }
 
     @Override

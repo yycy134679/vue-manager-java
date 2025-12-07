@@ -19,8 +19,18 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
+
+    private static final Set<String> URL_WHITELIST = new HashSet<>(Arrays.asList(
+            "/login",
+            "/logout",
+            "/captcha",
+            "/favicon.ico"
+    ));
 
     @Autowired
     JwtUtils jwtUtils;
@@ -38,6 +48,13 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
+
+        String uri = request.getRequestURI();
+        // 放行白名单请求，避免未登录场景下验证码等接口被 JWT 拦截
+        if (URL_WHITELIST.contains(uri)) {
+            chain.doFilter(request, response);
+            return;
+        }
 
         String jwt = request.getHeader(jwtUtils.getHeader());
 
