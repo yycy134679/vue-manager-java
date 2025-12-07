@@ -6,6 +6,7 @@ import com.example.security.JwtAuthenticationEntryPoint;
 import com.example.security.JwtAuthenticationFilter;
 import com.example.security.LoginFailureHandler;
 import com.example.security.LoginSuccessHandler;
+import com.example.service.impl.UserDetailServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +16,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -42,6 +44,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
         return new JwtAuthenticationFilter(authenticationManager());
     }
+
+    @Bean
+    BCryptPasswordEncoder bcryptPasswordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Autowired
+    UserDetailServiceImpl userDetailService;
+
 
     // 白名单
     private static final String[] URL_WHITELIST = {
@@ -82,9 +93,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication()
-                .withUser("root")
-                .password("{noop}admin") // {noop}表示明文密码
-                .roles("ADMIN");
+        auth.userDetailsService(userDetailService);
     }
 }
