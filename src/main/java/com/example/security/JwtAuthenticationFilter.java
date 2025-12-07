@@ -1,6 +1,9 @@
 package com.example.security;
 
 import cn.hutool.core.util.StrUtil;
+import com.example.entity.SysUser;
+import com.example.service.SysUserService;
+import com.example.service.impl.UserDetailServiceImpl;
 import com.example.util.JwtUtils;
 import freemarker.template.utility.StringUtil;
 import io.jsonwebtoken.Claims;
@@ -21,6 +24,12 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
     @Autowired
     JwtUtils jwtUtils;
+
+    @Autowired
+    UserDetailServiceImpl userDetailsService;
+
+    @Autowired
+    SysUserService sysUserService;
 
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);
@@ -51,9 +60,10 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
         String username = claim.getSubject();
 
-        // IDE 参数提示 (credentials: null, authorities: null) 不需要写在代码里
+        SysUser sysUser = sysUserService.getByUsername(username);
+
         UsernamePasswordAuthenticationToken token =
-                new UsernamePasswordAuthenticationToken(username, null, null);
+                new UsernamePasswordAuthenticationToken(username, null, userDetailsService.getUserAuthority(sysUser.getId()));
 
         SecurityContextHolder.getContext().setAuthentication(token);
         chain.doFilter(request, response);

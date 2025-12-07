@@ -4,6 +4,7 @@ import com.example.entity.SysUser;
 import com.example.service.SysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -29,5 +30,8 @@ public class UserDetailServiceImpl implements UserDetailsService {
     }
 
     // 获取权限信息 包括角色 权限
-    public List<GrantedAuthority> getUserAuthority(Long userId) { return null; }
+    public List<GrantedAuthority> getUserAuthority(Long userId) {
+        String authority = sysUserService.getUserAuthorityInfo(userId);
+        return AuthorityUtils.commaSeparatedStringToAuthorityList(authority);
+    }
 }

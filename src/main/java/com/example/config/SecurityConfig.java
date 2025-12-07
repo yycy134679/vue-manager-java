@@ -87,12 +87,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .accessDeniedHandler(jwtAccessDeniedHandler)
                 .and()
                 // 配置自定义过滤器
-                .addFilter(jwtAuthenticationFilter())
-                .addFilterBefore(captchaFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilter(jwtAuthenticationFilter());
+                //.addFilterBefore(captchaFilter, UsernamePasswordAuthenticationFilter.class);
     }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailService);
+        // 使用 BCrypt 进行密码匹配，确保数据库中的加密密码可以正常校验
+        auth.userDetailsService(userDetailService)
+                .passwordEncoder(bcryptPasswordEncoder());
     }
 }
