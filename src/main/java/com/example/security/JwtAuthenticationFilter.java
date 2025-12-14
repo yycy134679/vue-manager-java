@@ -1,11 +1,12 @@
 package com.example.security;
 
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
+import com.example.common.lang.Result;
 import com.example.entity.SysUser;
 import com.example.service.SysUserService;
 import com.example.service.impl.UserDetailServiceImpl;
 import com.example.util.JwtUtils;
-import freemarker.template.utility.StringUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +17,11 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -64,25 +67,38 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
             return;
         }
 
-        Claims claim = jwtUtils.getClaimByToken(jwt);
+        try {
+            Claims claim = jwtUtils.getClaimByToken(jwt);
 
-        // 【图片修正点】：图片原代码是 if (chain == null)，红字提示修正为 claim == null
-        if (claim == null) {
-            throw new JwtException("token 异常");
+            if (claim == null) {
+                throw new JwtException("token 异常");
+            }
+
+            if (jwtUtils.isTokenExpired(claim)) {
+                throw new JwtException("token 已过期");
+            }
+
+            String username = claim.getSubject();
+            SysUser sysUser = sysUserService.getByUsername(username);
+            if (sysUser == null) {
+                throw new JwtException("用户不存在");
+            }
+
+            UsernamePasswordAuthenticationToken token =
+                    new UsernamePasswordAuthenticationToken(username, null, userDetailsService.getUserAuthority(sysUser.getId()));
+
+            SecurityContextHolder.getContext().setAuthentication(token);
+            chain.doFilter(request, response);
+        } catch (JwtException e) {
+            SecurityContextHolder.clearContext();
+            response.setContentType("application/json;charset=UTF-8");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+            Result result = Result.fail(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage(), null);
+            try (ServletOutputStream outputStream = response.getOutputStream()) {
+                outputStream.write(JSONUtil.toJsonStr(result).getBytes(StandardCharsets.UTF_8));
+                outputStream.flush();
+            }
         }
-
-        if (jwtUtils.isTokenExpired(claim)) {
-            throw new JwtException("token 已过期");
-        }
-
-        String username = claim.getSubject();
-
-        SysUser sysUser = sysUserService.getByUsername(username);
-
-        UsernamePasswordAuthenticationToken token =
-                new UsernamePasswordAuthenticationToken(username, null, userDetailsService.getUserAuthority(sysUser.getId()));
-
-        SecurityContextHolder.getContext().setAuthentication(token);
-        chain.doFilter(request, response);
     }
 }
