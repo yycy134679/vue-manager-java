@@ -1,5 +1,6 @@
 package com.example.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.common.dto.SysMenuDto;
 import com.example.entity.SysMenu;
 import com.example.entity.SysUser;
@@ -75,5 +76,14 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
             }
         }
         return finalMenus;
+    }
+
+    @Override
+    public List<SysMenu> tree() {
+        // 1. 获取全部菜单的信息
+        List<SysMenu> menus = this.list(new QueryWrapper<SysMenu>().orderByAsc("orderNum"));
+        
+        // 2. 转换成树状接口
+        return buildTreeMenu(menus);
     }
 }
